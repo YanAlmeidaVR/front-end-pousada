@@ -99,24 +99,43 @@ export function ReservasList({
               {reserva.statusReserva === "ATIVA" && (
                 <div className="flex flex-wrap gap-2">
                   {reserva.statusPagamento === "PENDENTE" && (
-                    <Button size="sm" onClick={() => onProcessarPagamento(reserva.id)}>
+                    <Button 
+                      type="button"
+                      size="sm" 
+                      onClick={() => onProcessarPagamento(reserva.id)}
+                    >
                       <CreditCard className="mr-2 h-4 w-4" />
                       Processar Pagamento
                     </Button>
                   )}
                   {reserva.statusChave === "NAO_DEVOLVIDA" && (
-                    <Button size="sm" variant="outline" onClick={() => onDevolverChave(reserva.id)}>
+                    <Button 
+                      type="button"
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => onDevolverChave(reserva.id)}
+                    >
                       <Key className="mr-2 h-4 w-4" />
                       Devolver Chave
                     </Button>
                   )}
                   {reserva.statusPagamento === "PAGO" && reserva.statusChave === "DEVOLVIDA" && (
-                    <Button size="sm" variant="default" onClick={() => onCheckOut(reserva.id)}>
+                    <Button 
+                      type="button"
+                      size="sm" 
+                      variant="default" 
+                      onClick={() => onCheckOut(reserva.id)}
+                    >
                       <CheckCircle className="mr-2 h-4 w-4" />
                       Fazer Check-out
                     </Button>
                   )}
-                  <Button size="sm" variant="destructive" onClick={() => onCancelar(reserva.id)}>
+                  <Button 
+                    type="button"
+                    size="sm" 
+                    variant="destructive" 
+                    onClick={() => onCancelar(reserva.id)}
+                  >
                     <XCircle className="mr-2 h-4 w-4" />
                     Cancelar
                   </Button>

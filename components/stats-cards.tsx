@@ -27,7 +27,7 @@ export function StatsCards({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{totalHospedes}</div>
-          <p className="text-xs text-muted-foreground">Cadastrados no sistema</p>
+          <p className="text-xs text-muted-foreground">Com reservas ativas</p>
         </CardContent>
       </Card>
 

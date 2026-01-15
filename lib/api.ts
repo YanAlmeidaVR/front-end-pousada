@@ -255,25 +255,40 @@ export const api = {
   },
 
   async createReserva(reserva: {
-    hospedeId: number
-    numeroQuarto: number
-    dataCheckIn: string
-    dataCheckOut: string
-    metodoPagamento?: string
-  }): Promise<Reserva> {
-    const response = await fetch(`${API_URL}/pousada/reservas`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        hospedeId: reserva.hospedeId,
-        numeroQuarto: reserva.numeroQuarto,
-        dataCheckIn: reserva.dataCheckIn,
-        dataCheckOut: reserva.dataCheckOut,
-        metodoPagamento: reserva.metodoPagamento || 'DINHEIRO',
-      }),
-    })
-    if (!response.ok) throw new Error('Falha ao criar reserva')
-    const data: ReservaBackend = await response.json()
-    return convertReserva(data)
+  hospedeId: number
+  numeroQuarto: number
+  dataCheckIn: string
+  dataCheckOut: string
+  metodoPagamento?: string
+}): Promise<Reserva> {
+  const response = await fetch(`${API_URL}/pousada/reservas`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      hospedeId: reserva.hospedeId,
+      numeroQuarto: reserva.numeroQuarto,
+      dataCheckIn: reserva.dataCheckIn,
+      dataCheckOut: reserva.dataCheckOut,
+      metodoPagamento: reserva.metodoPagamento || 'DINHEIRO',
+    }),
+  })
+  
+  if (!response.ok) {
+    let errorMessage = 'Falha ao criar reserva'
+    
+    try {
+      const errorData = await response.text()
+      if (errorData) {
+        errorMessage = errorData
+      }
+    } catch (e) {
+      // Ignora erro ao parsear
+    }
+    
+    throw new Error(errorMessage)
+  }
+  
+  const data: ReservaBackend = await response.json()
+  return convertReserva(data)
   },
 }

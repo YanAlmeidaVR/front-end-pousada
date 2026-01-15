@@ -1,5 +1,12 @@
 import { toast } from "sonner"
 
+// Tipo para o estado do erro dialog
+export interface ErrorDialogState {
+  open: boolean
+  title: string
+  description: string
+}
+
 // Mapeamento das exceções do backend para mensagens amigáveis
 const errorMessages: Record<string, { title: string; description: string }> = {
   // Hóspede
@@ -53,55 +60,84 @@ const errorMessages: Record<string, { title: string; description: string }> = {
   },
 }
 
-export function handleApiError(error: any) {
+export function handleApiError(
+  error: any,
+  setErrorDialog?: (state: ErrorDialogState) => void
+) {
   console.error("API Error:", error)
 
   // Tentar extrair mensagem do backend
-  let errorType = "UnknownError"
-  let errorMessage = "Ocorreu um erro inesperado."
+  let errorInfo = {
+    title: "Erro",
+    description: "Ocorreu um erro inesperado.",
+  }
 
   // Se o erro tem uma resposta do backend
   if (error.message) {
-    // Procurar por nome de exceção na mensagem
-    const foundError = Object.keys(errorMessages).find((key) => error.message.includes(key))
+    let errorMessage = error.message
 
-    if (foundError) {
-      errorType = foundError
-      const errorInfo = errorMessages[foundError]
-      
-      toast.error(errorInfo.title, {
-        description: errorInfo.description,
-        duration: 4000,
-      })
-      return
+    // Tentar parsear se for JSON
+    try {
+      const jsonMatch = errorMessage.match(/\{.*\}/)
+      if (jsonMatch) {
+        const errorData = JSON.parse(jsonMatch[0])
+        errorMessage = errorData.message || errorMessage
+      }
+    } catch (e) {
+      // Se não for JSON válido, continua com a mensagem original
     }
 
-    // Se não encontrou exceção conhecida, usar a mensagem do erro
-    errorMessage = error.message
+    // Procurar por nome de exceção na mensagem
+    const foundError = Object.keys(errorMessages).find((key) => 
+      errorMessage.includes(key)
+    )
+
+    if (foundError) {
+      errorInfo = errorMessages[foundError]
+    } 
+    // Verificar se a mensagem contém "Quarto" e "ocupado"
+    else if (errorMessage.includes("Quarto") && errorMessage.includes("ocupado")) {
+      errorInfo = {
+        title: "Quarto ocupado",
+        description: errorMessage,
+      }
+    }
+    // Verificar se a mensagem contém "Verifique se as datas"
+    else if (errorMessage.includes("Verifique se as datas")) {
+      errorInfo = {
+        title: "Datas inválidas",
+        description: errorMessage,
+      }
+    }
+    else if (errorMessage.includes("Failed to fetch")) {
+      errorInfo = {
+        title: "Erro de conexão",
+        description: "Não foi possível conectar ao servidor. Verifique sua conexão.",
+      }
+    } else if (errorMessage.includes("Falha ao")) {
+      errorInfo = {
+        title: "Erro na operação",
+        description: errorMessage.replace("Falha ao criar reserva. ", ""),
+      }
+    } else {
+      // Usar a mensagem do backend diretamente se não encontrou padrão
+      errorInfo.description = errorMessage
+    }
   }
 
-  // Tratamento específico para erros HTTP
-  if (error.message.includes("Failed to fetch")) {
-    toast.error("Erro de conexão", {
-      description: "Não foi possível conectar ao servidor. Verifique sua conexão.",
+  // Se foi passada uma função para abrir o dialog, usa ela
+  if (setErrorDialog) {
+    setErrorDialog({
+      open: true,
+      ...errorInfo,
+    })
+  } else {
+    // Fallback para toast se não houver dialog
+    toast.error(errorInfo.title, {
+      description: errorInfo.description,
       duration: 4000,
     })
-    return
   }
-
-  if (error.message.includes("Falha ao")) {
-    toast.error("Erro na operação", {
-      description: error.message,
-      duration: 4000,
-    })
-    return
-  }
-
-  // Erro genérico
-  toast.error("Erro", {
-    description: errorMessage,
-    duration: 4000,
-  })
 }
 
 // Função helper para mostrar sucesso

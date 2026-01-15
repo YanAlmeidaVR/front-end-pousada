@@ -6,17 +6,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { RefreshCw, AlertCircle, Plus } from "lucide-react"
 import { StatsCards } from "@/components/stats-cards"
-import { HospedesTable } from "@/components/hospedes-table"
 import { HospedesTabs } from "@/components/hospedes-tabs"
 import { QuartosGrid } from "@/components/quartos-grid"
-import { ReservasList } from "@/components/reservas-list"
 import { ReservasTabs } from "@/components/reservas-tabs"
 import { Relatorios } from "@/components/relatorios"
 import { HospedeDialog } from "@/components/hospede-dialog"
 import { QuartoDialog } from "@/components/quarto-dialog"
 import { ReservaDialog } from "@/components/reserva-dialog"
 import { api, type Hospede, type Quarto, type Reserva } from "@/lib/api"
-import { handleApiError, showSuccess } from "@/lib/error-handle"
+import { handleApiError, showSuccess } from "@/lib/error-handler"
 
 const MOCK_DATA = {
   hospedes: [
@@ -50,7 +48,7 @@ export default function Page() {
   const [reservas, setReservas] = useState<Reserva[]>([])
   const [loading, setLoading] = useState(true)
   const [isDemoMode, setIsDemoMode] = useState(false)
-  const [activeTab, setActiveTab] = useState("hospedes")
+  const [activeTab, setActiveTab] = useState("reservas")
   
   // Estados dos modais
   const [hospedeDialogOpen, setHospedeDialogOpen] = useState(false)
@@ -171,8 +169,10 @@ export default function Page() {
     }
   }
 
+  // Cálculos para os cards de estatísticas
   const quartosDisponiveis = quartos.filter((q) => q.quartoStatus === "DISPONIVEL").length
   const reservasAtivas = reservas.filter((r) => r.statusReserva === "ATIVA").length
+  const hospedesComReservaAtiva = reservasAtivas // Cada reserva ativa = 1 hóspede
   const taxaOcupacao = quartos.length > 0 ? (reservasAtivas / quartos.length) * 100 : 0
 
   if (loading) {
@@ -208,7 +208,7 @@ export default function Page() {
         )}
 
         <StatsCards
-          totalHospedes={hospedes.length}
+          totalHospedes={hospedesComReservaAtiva}
           totalQuartos={quartos.length}
           quartosDisponiveis={quartosDisponiveis}
           reservasAtivas={reservasAtivas}
