@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/aconchega'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://aconchega-api-production.up.railway.app'
 
 // Tipos que o BACKEND realmente retorna (baseado no JSON real)
 interface HospedeBackend {
